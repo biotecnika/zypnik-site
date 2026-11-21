@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zypnik for Windows – talk instead of typing</title>
+<meta name="description" content="Zypnik for Windows: hold Ctrl + Win, speak, let go. Neatly written text appears in any app.">
+<link rel="icon" href="/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#140C36;--violet:#7C4DFF;--muted:#5B5675;--line:#E6E1F7;--soft:#F4F1FF}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,"Segoe UI",sans-serif;color:var(--ink);line-height:1.55;background:#fff}
+.wrap{max-width:880px;margin:0 auto;padding:0 24px}
+header{background:linear-gradient(135deg,#3A1F8E,#140C36);color:#fff;padding:64px 0 56px}
+header a.home{color:#D9D2F5;text-decoration:none;font-weight:600}
+h1{font-family:"Space Grotesk",Inter,sans-serif;font-size:44px;line-height:1.1;margin:24px 0 12px}
+.lead{color:#D9D2F5;font-size:19px;max-width:620px}
+.btn{display:inline-flex;align-items:center;gap:10px;background:#fff;color:#1E1446;font-weight:700;padding:15px 26px;border-radius:999px;text-decoration:none;font-size:17px;margin-top:22px}
+.small{font-size:13px;color:#D9D2F5;margin-top:10px}
+section{padding:48px 0;border-bottom:1px solid var(--line)}
+h2{font-family:"Space Grotesk",Inter,sans-serif;font-size:28px;margin:0 0 18px}
+ol{padding-left:22px}li{margin:10px 0}
+.card{background:var(--soft);border-radius:18px;padding:20px 22px;margin:16px 0}
+kbd{background:#fff;border:1px solid var(--line);border-bottom-width:3px;border-radius:7px;padding:2px 8px;font-family:inherit;font-weight:600;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+footer{padding:32px 0;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<a class="home" href="/">← Zypnik</a>
+<h1>Zypnik for Windows</h1>
+<p class="lead">Hold <b>Ctrl + Win</b>, speak, let go. Neatly written text appears wherever you're typing: email, WhatsApp, Word, Slack, your browser.</p>
+<a class="btn" href="/windows/Zypnik.exe" download>Download Zypnik for Windows</a>
+<p class="small" id="ver">Windows 10 and 11 · about 2 MB · no admin rights needed</p>
+</div></header>
+
+<section><div class="wrap">
+<h2>Install in a minute</h2>
+<ol>
+<li>Click <b>Download</b> above and open <b>Zypnik.exe</b>.</li>
+<li>Windows may say <b>"Windows protected your PC"</b>. That's because Zypnik is new. Click <b>More info</b>, then <b>Run anyway</b>. You only do this once.</li>
+<li>Zypnik installs itself and opens a welcome window. Click <b>Continue with Google</b> and sign in with your work account.</li>
+<li>That's it. Zypnik sits in the tray by the clock and starts with Windows.</li>
+</ol>
+<div class="card">If your antivirus asks about Zypnik, allow it: Zypnik listens for its shortcut keys so it knows when you want to talk. It doesn't record or send anything until you hold the shortcut.</div>
+</div></section>
+
+<section><div class="wrap">
+<h2>How to use it</h2>
+<div class="grid">
+<div class="card"><b>Talk</b><br>Click where you want to type, hold <kbd>Ctrl</kbd> + <kbd>Win</kbd>, speak, let go.</div>
+<div class="card"><b>Long messages</b><br><kbd>Ctrl</kbd> + <kbd>Win</kbd> + <kbd>Space</kbd> for hands-free. Press <kbd>Ctrl</kbd> + <kbd>Win</kbd> again to finish.</div>
+<div class="card"><b>Cancel</b><br>Press <kbd>Esc</kbd> or click ✕ on the violet pill.</div>
+<div class="card"><b>Names spelled right</b><br>Tray icon → Dictionary. Same list as the Zypnik phone app.</div>
+</div>
+<p>Prefer another key? Tray icon → Talk shortcut → Hold Right Alt.</p>
+</div></section>
+
+<section><div class="wrap">
+<h2>Private by design</h2>
+<p>The microphone is used only while you hold the shortcut. Your recording is sent to Zypnik's speech service to be written out, then discarded. Zypnik doesn't read your screen on Windows. <a href="/privacy.html">Privacy policy</a></p>
+</div></section>
+
+<footer><div class="wrap">Zypnik by Hyperlinkers · <a href="/">zypnik.com</a></div></footer>
+<script>
+fetch('/windows/version.json?t='+Date.now()).then(r=>r.json()).then(v=>{document.getElementById('ver').textContent='Version '+v.version+' · Windows 10 and 11 · no admin rights needed'}).catch(()=>{});
+</script>
+</body>
+</html>
