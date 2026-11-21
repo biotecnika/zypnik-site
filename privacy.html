@@ -25,11 +25,11 @@
 <p>Zypnik never reads anything between swipes, never records your screen, never reads password fields, and never taps or changes anything in other apps, except typing your spoken words into the box you chose. None of this screen content is sent to us.</p>
 
 <h2>2. Voice typing</h2>
-<p><b>Cloud voice typing (the default when you're signed in, on Android and Windows):</b> while you speak, the app records your voice and sends the recording to our server (Supabase). The server passes it to a speech-to-text provider (Groq or OpenAI) and an AI editing step (Groq) that fixes grammar, punctuation and formatting, then sends the text back. This processing may happen on servers in the United States. We don't keep the recording or the text.</p>
+<p><b>Cloud voice typing (the default when you're signed in, on Android and Windows):</b> while you speak, the app records your voice and sends the recording to our server (Supabase). The server passes it to a speech-to-text provider (Sarvam AI in India, or Deepgram, Groq or OpenAI) and an AI editing step (Groq) that fixes grammar, punctuation and formatting, then sends the text back. Depending on where you are, this processing happens on servers in India, the United States or Europe. With live voice typing the audio is streamed while you speak, so the text is ready sooner. We don't keep the recording or the text.</p>
 <p>To help spell names correctly, the app also sends the words in your Zypnik dictionary and the name of the app you're typing into (for example "WhatsApp"), so the text can be formatted for it.</p>
 <p><b>On-phone voice typing (Android):</b> if you aren't signed in, or choose on-phone speech, Android's own speech recognition turns your speech into text. When you're signed in, that text is sent to our server only for the AI editing step, and isn't kept.</p>
 <p>The microphone is used only from the moment you start voice typing until you stop or cancel.</p>
-<p>Groq and OpenAI process the audio and text under their API terms, which don't use it to train their models.</p>
+<p>These providers process the audio and text on our behalf under their API terms, and we don't allow them to use it to train their models.</p>
 
 <h2>3. Your account</h2>
 <p>Signing in with Google is optional. If you sign in, we store:</p>
