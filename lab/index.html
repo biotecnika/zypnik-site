@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zypnik speech lab</title><meta name="robots" content="noindex,nofollow"><link rel="icon" href="/logo.svg" type="image/svg+xml"><meta name="theme-color" content="#140C36">
+<style>
+:root{--ink:#140C36;--muted:#5B5675;--line:#E6E1F7;--violet:#6C3BF5;--soft:#F5F2FF;--good:#0E7A4F;--bad:#B42318}
+*{box-sizing:border-box}body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);margin:0;line-height:1.5;-webkit-font-smoothing:antialiased;background:#fff}
+nav{border-bottom:1px solid var(--line)}nav div{max-width:1040px;margin:0 auto;padding:0 20px;height:60px;display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}nav img{width:28px}nav span{font-weight:500;color:var(--muted);font-size:15px}
+main{max-width:1040px;margin:0 auto;padding:24px 20px 60px}h1{font-size:28px;margin:0 0 4px;letter-spacing:-.02em}.sub{color:var(--muted);margin:0 0 20px}
+.card{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:200px}
+label{font-size:13px;font-weight:600;color:var(--muted)}input,select,textarea{font:inherit;padding:9px 11px;border:1px solid var(--line);border-radius:10px;width:100%;color:var(--ink)}textarea{min-height:64px;resize:vertical}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;background:var(--soft);color:var(--ink)}button.primary{background:var(--violet);color:#fff}button.rec{background:#E5484D;color:#fff}button:disabled{opacity:.5;cursor:default}
+.status{font-size:14px;color:var(--muted)}.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;margin:2px 4px 2px 0;background:var(--soft)}.pill.on{background:#E3F6EC;color:var(--good)}.pill.off{background:#FDECEC;color:var(--bad)}
+table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);padding:8px 6px;white-space:nowrap}td{border-bottom:1px solid var(--line);padding:10px 6px;vertical-align:top}
+td.text{min-width:260px}.err{color:var(--bad)}.note{color:var(--muted);font-size:12px}.best{background:#F3FBF6}
+.num{white-space:nowrap;font-variant-numeric:tabular-nums}.hidden{display:none}#timer{font-variant-numeric:tabular-nums;color:var(--muted)}
+.scroll{overflow-x:auto}small{color:var(--muted)}
+</style></head><body>
+<nav><div><img src="/logo.svg" alt="">zypnik <span>speech lab</span></div></nav>
+<main>
+<h1>Compare speech engines</h1>
+<p class="sub">Speak once; the same clip goes to every engine. Nothing is saved: not the audio, not the text.</p>
+
+<div class="card" id="keyCard">
+  <div class="row"><div class="field"><label for="key">Lab key</label><input id="key" type="password" autocomplete="off" placeholder="Paste the lab key"></div><button id="saveKey">Use key</button></div>
+</div>
+
+<div class="card">
+  <div class="status" id="status">Checking engines…</div>
+</div>
+
+<div class="card">
+  <div class="row">
+    <div class="field" style="max-width:220px"><label for="lang">How you'll speak</label>
+      <select id="lang"><option value="en-IN">English (Indian)</option><option value="hi-IN">Hinglish / Hindi</option></select></div>
+    <div class="field"><label for="vocab">Special words (comma separated)</label><input id="vocab" value="Zypnik, Biotecnika, Rasayanika, Pharmanika, Meditechnica"></div>
+  </div>
+  <div class="field" style="margin-top:12px"><label for="ref">What you said (optional, for an accuracy score)</label><textarea id="ref" placeholder="Type the exact words you'll say, or leave empty"></textarea></div>
+  <div class="row" style="margin-top:12px">
+    <button class="primary" id="recBtn">🎙 Start recording</button>
+    <span id="timer"></span>
+    <button id="uploadBtn">Upload a clip</button><input type="file" id="file" accept="audio/*,video/*" class="hidden">
+    <button id="sampleBtn">Try the sample clip</button>
+  </div>
+  <p class="note" style="margin:10px 0 0">Up to 60 seconds. Tip: say something real you'd dictate, with names and numbers.</p>
+</div>
+
+<div class="card hidden" id="resultCard">
+  <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><b id="resultTitle">Results</b><button id="copyBtn">Copy results</button></div>
+  <div class="scroll"><table><thead><tr><th>Engine</th><th>Text</th><th>Accuracy</th><th>Wait after you stop</th><th>Price / min</th><th>This clip</th></tr></thead><tbody id="rows"></tbody></table></div>
+  <p class="note">Accuracy = 100% minus word error rate against "What you said" (punctuation and case ignored). Prices are list prices at ₹100 = $1, not bills. AssemblyAI bills the time the connection is open, including pauses.</p>
+</div>
+
+<div class="card hidden" id="tallyCard">
+  <b>Running average this session</b>
+  <div class="scroll"><table><thead><tr><th>Engine</th><th>Runs</th><th>Avg accuracy</th><th>Avg wait</th><th>Price / min</th></tr></thead><tbody id="tally"></tbody></table></div>
+</div>
+</main>
+<script>
+const FN = "https://fefjyufaisznmcjosvdc.supabase.co/functions/v1/sttcompare";
+const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlZmp5dWZhaXN6bm1jam9zdmRjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTUxMDExMjksImV4cCI6MjExMDY3NzEyOX0.P7kUwcDrcDeAdk_eLNV-ydG8w1tAphwVCJG5EqHhedQ";
+const SAMPLE_TEXT = "Hi team, please send the Biotecnika course brochure to the new students by five thirty today, and add Zypnik to the dictionary.";
+const $ = (id) => document.getElementById(id);
+let labKey = "", rates = {}, lastSummary = "";
+const tally = {};
+
+// ---------- key (from #k=… in the link, kept in this browser)
+function store(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
+function load(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+(function initKey() {
+  const m = location.hash.match(/k=([^&]+)/);
+  if (m) { labKey = decodeURIComponent(m[1]); store("zypnik_lab_key", labKey); history.replaceState(null, "", location.pathname); }
+  else labKey = load("zypnik_lab_key");
+  if (labKey) $("keyCard").classList.add("hidden");
+})();
+$("saveKey").onclick = () => { labKey = $("key").value.trim(); store("zypnik_lab_key", labKey); $("keyCard").classList.add("hidden"); checkStatus(); };
+
+function headers() { return { "Authorization": "Bearer " + ANON, "apikey": ANON, "x-lab-key": labKey }; }
+
+async function checkStatus() {
+  if (!labKey) { $("status").textContent = "Paste the lab key to start."; return; }
+  try {
+    const r = await fetch(FN, { headers: headers() });
+    const j = await r.json();
+    if (!r.ok) { $("status").innerHTML = `<span class="err">${esc(j.error || r.status)}</span>`; $("keyCard").classList.remove("hidden"); return; }
+    rates = j.rates_inr_per_min || {};
+    const p = (name, on, extra) => `<span class="pill ${on ? "on" : "off"}">${name}: ${on ? "ready" : (extra || "no key")}</span>`;
+    $("status").innerHTML = "Engines: " + p("Sarvam", j.sarvam) + p("Deepgram", j.deepgram) + p("Groq Whisper", j.groq) +
+      p("AssemblyAI", j.assemblyai, "key not added yet") + (j.assemblyai ? `<span class="note">models: ${esc((j.assemblyai_models || []).join(", "))}</span>` : "");
+  } catch (e) { $("status").innerHTML = `<span class="err">Couldn't reach the lab: ${esc(e.message)}</span>`; }
+}
+checkStatus();
+
+// ---------- audio helpers: anything -> 16 kHz mono 16-bit WAV
+function wav16(samples) {
+  const buf = new ArrayBuffer(44 + samples.length * 2), v = new DataView(buf);
+  const w = (o, s) => { for (let i = 0; i < 4; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, "RIFF"); v.setUint32(4, 36 + samples.length * 2, true); w(8, "WAVE"); w(12, "fmt "); v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, 16000, true); v.setUint32(28, 32000, true);
+  v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, "data"); v.setUint32(40, samples.length * 2, true);
+  for (let i = 0; i < samples.length; i++) { const s = Math.max(-1, Math.min(1, samples[i])); v.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true); }
+  return new Blob([buf], { type: "audio/wav" });
+}
+async function toWav16(audioBuffer) {
+  const len = Math.ceil(audioBuffer.duration * 16000);
+  const off = new OfflineAudioContext(1, len, 16000);
+  const src = off.createBufferSource(); src.buffer = audioBuffer; src.connect(off.destination); src.start();
+  const out = await off.startRendering();
+  return wav16(out.getChannelData(0).slice(0, 16000 * 60));
+}
+
+// ---------- recording
+let rec = null;
+$("recBtn").onclick = async () => {
+  if (rec) return stopRec();
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true } });
+    const ctx = new AudioContext();
+    const src = ctx.createMediaStreamSource(stream);
+    const proc = ctx.createScriptProcessor(4096, 1, 1);
+    const parts = [];
+    proc.onaudioprocess = (e) => parts.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+    src.connect(proc); proc.connect(ctx.destination);
+    const t0 = Date.now();
+    const tick = setInterval(() => { const s = (Date.now() - t0) / 1000; $("timer").textContent = s.toFixed(1) + " s"; if (s >= 60) stopRec(); }, 200);
+    rec = { stream, ctx, proc, parts, tick };
+    $("recBtn").textContent = "■ Stop and compare"; $("recBtn").className = "rec";
+  } catch (e) { alertBox("Microphone not available: " + e.message); }
+};
+async function stopRec() {
+  const r = rec; rec = null; clearInterval(r.tick);
+  r.proc.disconnect(); r.stream.getTracks().forEach((t) => t.stop());
+  $("recBtn").textContent = "🎙 Start recording"; $("recBtn").className = "primary";
+  const total = r.parts.reduce((n, p) => n + p.length, 0), all = new Float32Array(total);
+  let o = 0; for (const p of r.parts) { all.set(p, o); o += p.length; }
+  const ab = r.ctx.createBuffer(1, total, r.ctx.sampleRate); ab.copyToChannel(all, 0);
+  r.ctx.close();
+  run(await toWav16(ab), "your recording");
+}
+
+// ---------- upload & sample
+$("uploadBtn").onclick = () => $("file").click();
+$("file").onchange = async () => {
+  const f = $("file").files[0]; if (!f) return;
+  try { const ctx = new AudioContext(); const ab = await ctx.decodeAudioData(await f.arrayBuffer()); ctx.close(); run(await toWav16(ab), f.name); }
+  catch (e) { alertBox("Couldn't read that file: " + e.message); }
+  $("file").value = "";
+};
+$("sampleBtn").onclick = async () => {
+  $("ref").value = SAMPLE_TEXT; $("lang").value = "en-IN";
+  const r = await fetch("/lab/sample.wav"); run(await r.blob(), "the sample clip (computer voice)");
+};
+
+// ---------- run & show
+function alertBox(msg) { $("resultCard").classList.remove("hidden"); $("resultTitle").textContent = "Problem"; $("rows").innerHTML = `<tr><td colspan="6" class="err">${esc(msg)}</td></tr>`; }
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function words(s) { return String(s).toLowerCase().normalize("NFKC").replace(/[^\p{L}\p{N}\s']/gu, " ").replace(/'/g, "").split(/\s+/).filter(Boolean); }
+function accuracy(ref, hyp) {
+  const r = words(ref), h = words(hyp); if (!r.length) return null;
+  const d = Array.from({ length: r.length + 1 }, (_, i) => [i, ...Array(h.length).fill(0)]);
+  for (let j = 1; j <= h.length; j++) d[0][j] = j;
+  for (let i = 1; i <= r.length; i++) for (let j = 1; j <= h.length; j++)
+    d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (r[i - 1] === h[j - 1] ? 0 : 1));
+  return Math.max(0, 100 - (d[r.length][h.length] / r.length) * 100);
+}
+const ms = (v) => v == null ? "–" : (v / 1000).toFixed(1) + " s";
+const inr = (v, d = 2) => v == null ? "–" : "₹" + Number(v).toFixed(d);
+
+async function run(blob, label) {
+  if (!labKey) return alertBox("Paste the lab key first.");
+  ["recBtn", "uploadBtn", "sampleBtn"].forEach((id) => $(id).disabled = true);
+  $("resultCard").classList.remove("hidden"); $("resultTitle").textContent = "Comparing " + label + "…";
+  $("rows").innerHTML = `<tr><td colspan="6" class="note">Sending the same clip to every engine. This takes about as long as the clip, plus a few seconds.</td></tr>`;
+  try {
+    const fd = new FormData();
+    fd.append("file", blob, "clip.wav"); fd.append("lang", $("lang").value); fd.append("vocab", $("vocab").value);
+    const r = await fetch(FN, { method: "POST", headers: headers(), body: fd });
+    const j = await r.json();
+    if (!r.ok) return alertBox(j.error || ("Error " + r.status));
+    show(j, label);
+  } catch (e) { alertBox("Request failed: " + e.message); }
+  finally { ["recBtn", "uploadBtn", "sampleBtn"].forEach((id) => $(id).disabled = false); }
+}
+
+function show(j, label) {
+  const ref = $("ref").value.trim();
+  const res = j.results.map((x) => ({ ...x, acc: x.error ? null : accuracy(ref, x.text), rate: rates[rateKey(x)] }));
+  const best = Math.max(...res.map((x) => x.acc ?? -1));
+  $("resultTitle").textContent = `Results for ${label} (${j.audio_seconds} s, ${j.lang === "hi-IN" ? "Hinglish" : "English"})`;
+  $("rows").innerHTML = res.map((x) => `<tr class="${x.acc != null && x.acc === best && best >= 0 ? "best" : ""}">
+    <td><b>${esc(x.engine)}</b><div class="note">${esc(x.model)}</div></td>
+    <td class="text">${x.error ? `<span class="err">${esc(x.error)}</span>` : esc(x.text || "(no words)")}${x.note ? `<div class="note">${esc(x.note)}</div>` : ""}</td>
+    <td class="num">${x.acc == null ? "–" : x.acc.toFixed(0) + "%"}</td>
+    <td class="num">${x.error ? "–" : ms(x.ms_after_audio)}</td>
+    <td class="num">${x.rate == null ? "–" : inr(x.rate)}</td>
+    <td class="num">${inr(x.cost_inr, 3)}</td></tr>`).join("");
+  lastSummary = `Zypnik speech lab: ${label}, ${j.audio_seconds}s, ${j.lang}\n` + (ref ? `Said: ${ref}\n` : "") +
+    res.map((x) => `- ${x.engine} [${x.model}]: ${x.error ? "ERROR " + x.error : `"${x.text}"`} | accuracy ${x.acc == null ? "-" : x.acc.toFixed(0) + "%"} | wait ${ms(x.ms_after_audio)} | ${x.rate == null ? "-" : "₹" + x.rate + "/min"}`).join("\n");
+  for (const x of res) {
+    if (x.error) continue;
+    const k = x.engine + " · " + x.model, t = tally[k] || (tally[k] = { n: 0, acc: 0, accN: 0, wait: 0, rate: x.rate });
+    t.n++; t.wait += x.ms_after_audio || 0; if (x.acc != null) { t.acc += x.acc; t.accN++; }
+  }
+  $("tallyCard").classList.remove("hidden");
+  $("tally").innerHTML = Object.entries(tally).map(([k, t]) => `<tr><td>${esc(k)}</td><td class="num">${t.n}</td><td class="num">${t.accN ? (t.acc / t.accN).toFixed(0) + "%" : "–"}</td><td class="num">${ms(t.wait / t.n)}</td><td class="num">${t.rate == null ? "–" : inr(t.rate)}</td></tr>`).join("");
+}
+function rateKey(x) {
+  if (x.engine.startsWith("Sarvam")) return "sarvam:" + x.model;
+  if (x.engine.startsWith("Deepgram")) return "deepgram:" + x.model;
+  if (x.engine.startsWith("AssemblyAI")) return "assemblyai:" + x.model;
+  return "groq:" + x.model;
+}
+$("copyBtn").onclick = async () => { try { await navigator.clipboard.writeText(lastSummary); $("copyBtn").textContent = "Copied"; setTimeout(() => $("copyBtn").textContent = "Copy results", 1500); } catch (e) {} };
+</script>
+</body></html>
