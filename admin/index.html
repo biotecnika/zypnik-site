@@ -23,9 +23,9 @@
   .sub{margin:4px 0 0;color:#5A606B;font-size:14px}
   .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
   .card{background:#fff;border:1px solid #E3E6EB;border-radius:12px;padding:18px}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:16px}
   .stat .l{font-size:13px;color:#5A606B}.stat .v{font-size:28px;font-weight:700;margin-top:6px}.stat .n{font-size:12px;color:#5A606B;margin-top:4px}
-  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr));gap:16px}
   .bars{display:flex;align-items:flex-end;gap:5px;height:150px}
   .bars>div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:1px}
   .legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:#5A606B}
@@ -59,6 +59,37 @@
   #gate{max-width:420px;margin:15vh auto;text-align:center;padding:32px}
   .err{color:#C2410C;font-size:14px;margin-top:12px}
   [hidden]{display:none!important}
+  /* Phones: nav becomes a top bar, tables become cards. */
+  @media (max-width:720px){
+    nav{flex:1 1 100%;max-width:none;flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 12px;gap:4px;position:sticky;top:0;z-index:5}
+    nav .brand{padding:0 8px 0 4px;font-size:16px;width:100%}
+    nav button{padding:8px 10px;font-size:14px}
+    nav .me{margin:0 0 0 auto;padding:0;display:flex;gap:8px;align-items:center}
+    nav .me #meEmail{display:none}
+    main{flex:1 1 100%;padding:16px;gap:16px}
+    h1{font-size:21px}
+    .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .stat .v{font-size:22px}
+    .card{padding:14px}
+    .row>.seg{width:100%}.seg button{margin:0 6px 0 0}
+    .row label.f, .row label.f input, .row label.f select{width:100%!important}
+    .row>div[style*="flex-end"]{width:100%;justify-content:stretch!important}
+    .scroll table{min-width:0!important}
+    .cards thead{display:none}
+    .cards tr{display:block;border:1px solid #E3E6EB;border-radius:10px;margin-bottom:10px;padding:6px 12px}
+    .cards td{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;padding:7px 0;text-align:right}
+    .cards td::before{content:attr(data-l);color:#5A606B;font-size:12px;text-align:left;flex:none}
+    .cards td:first-child{display:block;text-align:left;border-bottom:1px solid #EEF0F3;padding-bottom:9px}
+    .cards td:first-child::before,.cards td.act::before{content:none}
+    .cards td.act button{width:100%}
+    .cards td[colspan]{display:block;text-align:left}
+    .cards td[colspan]::before{content:none}
+    .meter{margin-left:auto}
+    .svc{grid-template-columns:110px minmax(0,1fr) 80px}
+    .heat div{height:20px}
+    .bars{gap:2px}
+  }
+
 </style>
 </head>
 <body>
@@ -105,7 +136,7 @@
           <button class="btn" id="csv" style="align-self:flex-end">Download CSV</button>
         </div>
       </div>
-      <div class="scroll"><table style="min-width:920px">
+      <div class="scroll"><table class="cards" style="min-width:920px">
         <thead><tr><th>User</th><th>Signed up</th><th>Devices</th><th>Plan</th><th>This month</th><th>Words</th><th>Last active</th><th></th></tr></thead>
         <tbody id="users"><tr><td colspan="8" class="muted">Loading…</td></tr></tbody>
       </table></div>
@@ -130,14 +161,14 @@
     <section class="card">
       <h2>Our estimate vs the services' bills</h2>
       <p class="muted" style="margin:4px 0 12px">Type each service's figure for the month from its dashboard and press Save.</p>
-      <div class="scroll"><table style="min-width:640px">
+      <div class="scroll"><table class="cards" style="min-width:640px">
         <thead><tr><th>Service</th><th>Our estimate</th><th>Their bill (₹)</th><th>Difference</th><th></th></tr></thead>
         <tbody id="bills"></tbody>
       </table></div>
     </section>
     <section class="card">
       <div class="row" style="margin-bottom:12px"><h2>Cost and revenue per user</h2><span class="muted">Highest cost first</span></div>
-      <div class="scroll"><table style="min-width:760px">
+      <div class="scroll"><table class="cards" style="min-width:760px">
         <thead><tr><th>User</th><th>Plan</th><th>Minutes</th><th>Cost</th><th>Pays</th><th>Margin</th></tr></thead>
         <tbody id="cusers"></tbody>
       </table></div>
@@ -242,11 +273,11 @@ function renderUsers() {
     const pct = u.limit_seconds ? Math.min(100, u.used_seconds / u.limit_seconds * 100) : 0;
     const dev = u.devices.map((d) => d === "windows" ? "Windows" : "Phone").join(", ") || "—";
     return `<tr><td><div style="font-weight:600">${esc(u.name || u.email.split("@")[0])}</div><div class="muted">${esc(u.email)}</div></td>
-      <td>${dmy(u.created_at)}</td><td>${dev}</td>
-      <td><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span>${u.plan_until ? `<div class="muted">until ${dmy(u.plan_until)}</div>` : ""}</td>
-      <td><div style="font-size:13px">${num(Math.round(u.used_seconds / 60))} of ${num(Math.round(u.limit_seconds / 60))} min</div><div class="meter"><div style="width:${pct}%;background:${pct > 85 ? "#C2410C" : "#3B4BD8"}"></div></div></td>
-      <td>${num(u.words_month)}</td><td>${ago(u.last_active)}</td>
-      <td><button class="btn primary" style="padding:7px 12px;font-size:13px" data-uid="${u.id}">Change plan</button></td></tr>`;
+      <td data-l="Signed up">${dmy(u.created_at)}</td><td data-l="Devices">${dev}</td>
+      <td data-l="Plan"><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span>${u.plan_until ? `<div class="muted">until ${dmy(u.plan_until)}</div>` : ""}</td>
+      <td data-l="This month"><div><div style="font-size:13px">${num(Math.round(u.used_seconds / 60))} of ${num(Math.round(u.limit_seconds / 60))} min</div><div class="meter"><div style="width:${pct}%;background:${pct > 85 ? "#C2410C" : "#3B4BD8"}"></div></div></div></td>
+      <td data-l="Words">${num(u.words_month)}</td><td data-l="Last active">${ago(u.last_active)}</td>
+      <td class="act"><button class="btn primary" style="padding:7px 12px;font-size:13px" data-uid="${u.id}">Change plan</button></td></tr>`;
   }).join("") || '<tr><td colspan="8" class="muted">No one matches.</td></tr>';
 }
 $("q").oninput = renderUsers; $("planFilter").onchange = renderUsers;
@@ -288,21 +319,21 @@ async function loadCosts() {
   const c = await api("costs", { month: $("month").value });
   const stat = (l, v, n, cls = "") => `<div class="card stat"><div class="l">${l}</div><div class="v ${cls}">${v}</div><div class="n">${n}</div></div>`;
   $("cstats").innerHTML = stat("Spent", inr(c.spent), "bills where entered, else estimate") + stat("Earned", inr(c.earned), "after GST and store fees")
-    + stat("Profit", inr(c.profit), "earned minus spent", c.profit >= 0 ? "pos" : "neg") + stat("Cost per active user", inr(c.cost_per_user), "estimate") + stat("Cost per minute", inr(c.cost_per_minute), "speech + clean-up");
+    + stat("Profit", (c.profit < 0 ? "−" : "") + inr(Math.abs(c.profit)), "earned minus spent", c.profit >= 0 ? "pos" : "neg") + stat("Cost per active user", inr(c.cost_per_user), "estimate") + stat("Cost per minute", inr(c.cost_per_minute), "speech + clean-up");
   const max = Math.max(1, ...c.per_day.map((d) => Math.max(d.cost, d.revenue)));
   $("cBars").innerHTML = c.per_day.map((d) => `<div style="flex-direction:row;align-items:flex-end;gap:2px" title="${d.day}: spend ${inr(d.cost)}, revenue ${inr(d.revenue)}"><div style="flex:1;background:#E8833A;border-radius:3px 3px 0 0;height:${d.cost / max * 100}%"></div><div style="flex:1;background:#2F7D4F;border-radius:3px 3px 0 0;height:${Math.max(d.revenue / max * 100, 0.5)}%"></div></div>`).join("") || '<span class="muted">No usage this month.</span>';
   const smax = Math.max(1, ...c.services.map((s) => s.bill ?? s.estimate));
   $("svcs").innerHTML = c.services.map((s) => { const v = s.bill ?? s.estimate; return `<div class="svc"><div><div style="font-weight:600">${SVC[s.service][0]}</div><div class="muted">${SVC[s.service][1]}</div></div><div class="bar"><div style="width:${v / smax * 100}%"></div></div><div style="text-align:right;font-weight:600">${inr(v)}${s.free_tier ? '<div class="muted">free tier</div>' : ""}</div></div>`; }).join("");
   $("bills").innerHTML = c.services.map((s) => {
     const diff = s.bill == null ? "—" : (s.bill - s.estimate >= 0 ? "+" : "−") + inr(Math.abs(s.bill - s.estimate));
-    return `<tr><td style="font-weight:600">${SVC[s.service][0]}</td><td>${s.service === "supabase" ? "—" : inr(s.estimate)}</td>
-      <td><input type="number" min="0" step="0.01" style="width:130px" value="${s.bill ?? ""}" data-bill="${s.service}" aria-label="${SVC[s.service][0]} bill"></td><td>${diff}</td>
-      <td><button class="btn" data-save="${s.service}">Save</button></td></tr>`;
+    return `<tr><td style="font-weight:600">${SVC[s.service][0]}</td><td data-l="Our estimate">${s.service === "supabase" ? "—" : inr(s.estimate)}</td>
+      <td data-l="Their bill (₹)"><input type="number" min="0" step="0.01" style="width:130px" value="${s.bill ?? ""}" data-bill="${s.service}" aria-label="${SVC[s.service][0]} bill"></td><td data-l="Difference">${diff}</td>
+      <td class="act"><button class="btn" data-save="${s.service}">Save</button></td></tr>`;
   }).join("");
   $("cusers").innerHTML = c.users.map((u) => {
     const pays = u.plan === "Team" ? "Company" : inr(u.revenue);
     const m = u.plan === "Team" ? '<span class="muted">n/a</span>' : `<span class="${u.revenue - u.cost >= 0 ? "pos" : "neg"}">${u.revenue - u.cost >= 0 ? "+" : "−"}${inr(Math.abs(u.revenue - u.cost))}</span>`;
-    return `<tr><td><div style="font-weight:600">${esc(u.name || u.email.split("@")[0])}</div><div class="muted">${esc(u.email)}</div></td><td><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span></td><td>${num(u.minutes)}</td><td>${inr(u.cost)}</td><td>${pays}</td><td>${m}</td></tr>`;
+    return `<tr><td><div style="font-weight:600">${esc(u.name || u.email.split("@")[0])}</div><div class="muted">${esc(u.email)}</div></td><td data-l="Plan"><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span></td><td data-l="Minutes">${num(u.minutes)}</td><td data-l="Cost">${inr(u.cost)}</td><td data-l="Pays">${pays}</td><td data-l="Margin">${m}</td></tr>`;
   }).join("") || '<tr><td colspan="6" class="muted">No usage this month.</td></tr>';
 }
 $("bills").onclick = async (e) => {
