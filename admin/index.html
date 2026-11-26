@@ -201,6 +201,8 @@ const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const inr = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: n < 100 ? 2 : 0 });
 const num = (n) => Number(n || 0).toLocaleString("en-IN");
+/** Minutes from seconds: one decimal under 10 min, so short use never shows as 0. */
+const mins = (sec) => { const m = (sec || 0) / 60; return m > 0 && m < 10 ? m.toLocaleString("en-IN", { maximumFractionDigits: 1, minimumFractionDigits: 1 }) : num(Math.round(m)); };
 const PLAN_MIN = { Free: 100, Pro: 600, Premium: 1500, Team: 5000, Custom: 1000 };
 const LANG = { en: "English", hi: "Hindi", bn: "Bengali", ta: "Tamil", te: "Telugu", kn: "Kannada", ml: "Malayalam", mr: "Marathi", gu: "Gujarati", pa: "Punjabi", od: "Odia", es: "Spanish", fr: "French", de: "German", ar: "Arabic", ja: "Japanese" };
 let users = [], days = 30, current = null;
@@ -275,7 +277,7 @@ function renderUsers() {
     return `<tr><td><div style="font-weight:600">${esc(u.name || u.email.split("@")[0])}</div><div class="muted">${esc(u.email)}</div></td>
       <td data-l="Signed up">${dmy(u.created_at)}</td><td data-l="Devices">${dev}</td>
       <td data-l="Plan"><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span>${u.plan_until ? `<div class="muted">until ${dmy(u.plan_until)}</div>` : ""}</td>
-      <td data-l="This month"><div><div style="font-size:13px">${num(Math.round(u.used_seconds / 60))} of ${num(Math.round(u.limit_seconds / 60))} min</div><div class="meter"><div style="width:${pct}%;background:${pct > 85 ? "#C2410C" : "#3B4BD8"}"></div></div></div></td>
+      <td data-l="This month"><div><div style="font-size:13px">${mins(u.used_seconds)} of ${num(Math.round(u.limit_seconds / 60))} min</div><div class="meter"><div style="width:${pct}%;background:${pct > 85 ? "#C2410C" : "#3B4BD8"}"></div></div></div></td>
       <td data-l="Words">${num(u.words_month)}</td><td data-l="Last active">${ago(u.last_active)}</td>
       <td class="act"><button class="btn primary" style="padding:7px 12px;font-size:13px" data-uid="${u.id}">Change plan</button></td></tr>`;
   }).join("") || '<tr><td colspan="8" class="muted">No one matches.</td></tr>';
@@ -333,7 +335,7 @@ async function loadCosts() {
   $("cusers").innerHTML = c.users.map((u) => {
     const pays = u.plan === "Team" ? "Company" : inr(u.revenue);
     const m = u.plan === "Team" ? '<span class="muted">n/a</span>' : `<span class="${u.revenue - u.cost >= 0 ? "pos" : "neg"}">${u.revenue - u.cost >= 0 ? "+" : "−"}${inr(Math.abs(u.revenue - u.cost))}</span>`;
-    return `<tr><td><div style="font-weight:600">${esc(u.name || u.email.split("@")[0])}</div><div class="muted">${esc(u.email)}</div></td><td data-l="Plan"><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span></td><td data-l="Minutes">${num(u.minutes)}</td><td data-l="Cost">${inr(u.cost)}</td><td data-l="Pays">${pays}</td><td data-l="Margin">${m}</td></tr>`;
+    return `<tr><td><div style="font-weight:600">${esc(u.name || u.email.split("@")[0])}</div><div class="muted">${esc(u.email)}</div></td><td data-l="Plan"><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span></td><td data-l="Minutes">${mins(u.minutes * 60)}</td><td data-l="Cost">${inr(u.cost)}</td><td data-l="Pays">${pays}</td><td data-l="Margin">${m}</td></tr>`;
   }).join("") || '<tr><td colspan="6" class="muted">No usage this month.</td></tr>';
 }
 $("bills").onclick = async (e) => {
