@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Zypnik admin</title>
+<link rel="icon" href="/icon-512.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#F6F7F9;font-family:Inter,system-ui,sans-serif;color:#14161A}
+  a{color:#3B4BD8}
+  .wrap{display:flex;flex-wrap:wrap;min-height:100vh}
+  nav{flex:1 1 220px;max-width:260px;background:#14161A;color:#E8EAEE;padding:24px 16px;display:flex;flex-direction:column;gap:4px}
+  nav .brand{font-weight:700;font-size:18px;padding:0 12px 20px}
+  nav button{all:unset;cursor:pointer;color:#C9CDD6;padding:10px 12px;border-radius:8px}
+  nav button[aria-current=page]{color:#fff;background:#2A2D35;font-weight:600}
+  nav .me{margin-top:auto;padding:12px;font-size:12px;color:#9AA0AC}
+  nav .me button{padding:6px 0;color:#C9CDD6;text-decoration:underline}
+  main{flex:999 1 560px;min-width:0;padding:32px;display:flex;flex-direction:column;gap:24px}
+  h1{margin:0;font-size:26px} h2{margin:0;font-size:15px}
+  .sub{margin:4px 0 0;color:#5A606B;font-size:14px}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+  .card{background:#fff;border:1px solid #E3E6EB;border-radius:12px;padding:18px}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px}
+  .stat .l{font-size:13px;color:#5A606B}.stat .v{font-size:28px;font-weight:700;margin-top:6px}.stat .n{font-size:12px;color:#5A606B;margin-top:4px}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px}
+  .bars{display:flex;align-items:flex-end;gap:5px;height:150px}
+  .bars>div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:1px}
+  .legend{display:flex;gap:16px;margin-top:10px;font-size:12px;color:#5A606B}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  .heat{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px}
+  .heat div{height:26px;border-radius:4px}
+  .chip{display:inline-block;background:#EEF0FD;color:#2A37A8;border-radius:999px;padding:4px 10px;font-size:13px;margin:0 6px 6px 0}
+  .seg button{font:inherit;font-size:14px;padding:8px 14px;border-radius:8px;cursor:pointer;border:1px solid #CDD2DA;background:#fff;color:#14161A;margin-left:6px}
+  .seg button[aria-pressed=true]{border-color:#3B4BD8;background:#3B4BD8;color:#fff}
+  label.f{display:flex;flex-direction:column;font-size:12px;color:#5A606B;gap:4px}
+  input,select{font:inherit;font-size:14px;padding:8px 10px;border:1px solid #CDD2DA;border-radius:8px;background:#fff;color:#14161A}
+  .btn{font:inherit;font-size:14px;padding:9px 14px;border-radius:8px;border:1px solid #CDD2DA;background:#fff;cursor:pointer;color:#14161A}
+  .btn.primary{background:#3B4BD8;border-color:#3B4BD8;color:#fff;font-weight:600}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{font-weight:600;text-align:left;color:#5A606B;font-size:12px;padding:10px 8px;border-bottom:1px solid #E3E6EB;white-space:nowrap}
+  td{padding:11px 8px;border-bottom:1px solid #EEF0F3;vertical-align:middle}
+  .muted{color:#5A606B;font-size:12px}
+  .plan{border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+  .Free{background:#EEF0F3;color:#3A3F48}.Pro{background:#E6F4EC;color:#1F6B3E}.Team{background:#FDEEDF;color:#8A4A12}.Premium{background:#EEF0FD;color:#2A37A8}.Custom{background:#F3E8FD;color:#6B21A8}
+  .meter{height:6px;background:#EEF0F3;border-radius:3px;margin-top:5px;width:120px}.meter div{height:6px;border-radius:3px}
+  .svc{display:grid;grid-template-columns:150px minmax(0,1fr) 90px;gap:10px;align-items:center;font-size:14px;margin-bottom:10px}
+  .svc .bar{height:8px;background:#EEF0F3;border-radius:4px}.svc .bar div{height:8px;border-radius:4px;background:#3B4BD8}
+  .pos{color:#2F7D4F;font-weight:600}.neg{color:#C2410C;font-weight:600}
+  dialog{border:0;border-radius:14px;padding:22px;width:min(520px,92vw);box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  dialog::backdrop{background:rgba(20,22,26,.45)}
+  .plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0}
+  .plans button{text-align:left;font:inherit;padding:12px 14px;border-radius:10px;cursor:pointer;background:#fff;border:2px solid #E3E6EB}
+  .plans button[aria-pressed=true]{border-color:#3B4BD8}
+  .plans b{display:block;font-size:15px}.plans span{display:block;font-size:12px;color:#5A606B;margin-top:2px}
+  #gate{max-width:420px;margin:15vh auto;text-align:center;padding:32px}
+  .err{color:#C2410C;font-size:14px;margin-top:12px}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div id="gate" class="card" hidden>
+  <h1 style="font-size:22px">Zypnik admin</h1>
+  <p class="sub" style="margin:10px 0 20px">Sign in with an admin Google account.</p>
+  <button class="btn primary" id="signin">Continue with Google</button>
+  <p class="err" id="gateErr" hidden></p>
+</div>
+
+<div class="wrap" id="app" hidden>
+  <nav aria-label="Admin sections">
+    <div class="brand">Zypnik admin</div>
+    <button data-tab="users" aria-current="page">Users and usage</button>
+    <button data-tab="costs">Costs and revenue</button>
+    <div class="me"><div id="meEmail"></div><button id="signout">Sign out</button></div>
+  </nav>
+
+  <main id="tab-users">
+    <div class="row">
+      <div><h1>Users and usage</h1><p class="sub">Counts only. Zypnik never stores what people say.</p></div>
+      <div class="seg" id="range"><button data-d="1">Today</button><button data-d="7">7 days</button><button data-d="30" aria-pressed="true">30 days</button></div>
+    </div>
+    <section class="stats" id="stats"></section>
+    <section class="grid2">
+      <div class="card">
+        <h2>Minutes dictated per day</h2><p class="muted" style="margin:4px 0 14px" id="daysLabel">Phone and Windows</p>
+        <div class="bars" id="dayBars" role="img" aria-label="Minutes per day"></div>
+        <div class="legend"><span><i style="background:#3B4BD8"></i>Phone</span><span><i style="background:#E8833A"></i>Windows</span></div>
+      </div>
+      <div class="card">
+        <h2>Busiest hours (India time)</h2><p class="muted" style="margin:4px 0 14px">Darker = more dictations (from 27 Nov)</p>
+        <div class="heat" id="heat" role="img" aria-label="Dictations by hour"></div>
+        <div class="row muted" style="margin-top:8px"><span>12 am</span><span>12 pm</span><span>11 pm</span></div>
+        <h2 style="margin-top:18px">Languages used</h2><div id="langs" style="margin-top:8px"></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="row" style="margin-bottom:14px">
+        <h2 style="font-size:17px">Everyone who signed up</h2>
+        <div class="row" style="justify-content:flex-end">
+          <label class="f">Search<input type="search" id="q" placeholder="Name or email" style="width:220px"></label>
+          <label class="f">Plan<select id="planFilter"><option value="">All plans</option><option>Free</option><option>Pro</option><option>Premium</option><option>Team</option><option>Custom</option></select></label>
+          <button class="btn" id="csv" style="align-self:flex-end">Download CSV</button>
+        </div>
+      </div>
+      <div class="scroll"><table style="min-width:920px">
+        <thead><tr><th>User</th><th>Signed up</th><th>Devices</th><th>Plan</th><th>This month</th><th>Words</th><th>Last active</th><th></th></tr></thead>
+        <tbody id="users"><tr><td colspan="8" class="muted">Loading…</td></tr></tbody>
+      </table></div>
+    </section>
+  </main>
+
+  <main id="tab-costs" hidden>
+    <div class="row">
+      <div><h1>Costs and revenue</h1><p class="sub">Live estimate from every dictation × each service's price. Bills you enter replace the estimate.</p></div>
+      <label class="f">Month<input type="month" id="month"></label>
+    </div>
+    <section class="stats" id="cstats"></section>
+    <section class="grid2">
+      <div class="card">
+        <h2>Spend vs revenue per day</h2><p class="muted" style="margin:4px 0 14px">₹ (estimate)</p>
+        <div class="bars" id="cBars" role="img" aria-label="Daily spend and revenue" style="flex-direction:row"></div>
+        <div class="legend"><span><i style="background:#E8833A"></i>Spend</span><span><i style="background:#2F7D4F"></i>Revenue</span></div>
+      </div>
+      <div class="card"><h2 style="margin-bottom:12px">Where the money goes</h2><div id="svcs"></div>
+        <p class="muted" style="margin-top:12px">Groq is on its free tier: its line shows what it would cost at list price. Clean-up is estimated at Groq's price.</p></div>
+    </section>
+    <section class="card">
+      <h2>Our estimate vs the services' bills</h2>
+      <p class="muted" style="margin:4px 0 12px">Type each service's figure for the month from its dashboard and press Save.</p>
+      <div class="scroll"><table style="min-width:640px">
+        <thead><tr><th>Service</th><th>Our estimate</th><th>Their bill (₹)</th><th>Difference</th><th></th></tr></thead>
+        <tbody id="bills"></tbody>
+      </table></div>
+    </section>
+    <section class="card">
+      <div class="row" style="margin-bottom:12px"><h2>Cost and revenue per user</h2><span class="muted">Highest cost first</span></div>
+      <div class="scroll"><table style="min-width:760px">
+        <thead><tr><th>User</th><th>Plan</th><th>Minutes</th><th>Cost</th><th>Pays</th><th>Margin</th></tr></thead>
+        <tbody id="cusers"></tbody>
+      </table></div>
+    </section>
+  </main>
+</div>
+
+<dialog id="planDlg" aria-labelledby="planTitle">
+  <h1 id="planTitle" style="font-size:20px">Change plan</h1>
+  <p class="sub" id="planWho"></p>
+  <div class="plans" id="planBtns"></div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <label class="f">Monthly minutes<input type="number" id="planMin" min="0" max="100000"></label>
+    <label class="f">Until<select id="planUntil"><option value="">No end date</option><option value="1">1 month</option><option value="3">3 months</option><option value="12">1 year</option></select></label>
+    <label class="f">Note (who asked, why)<input type="text" id="planNote" maxlength="300" placeholder="e.g. Requested on WhatsApp, free month"></label>
+  </div>
+  <p class="err" id="planErr" hidden></p>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+    <button class="btn" id="planCancel">Cancel</button><button class="btn primary" id="planSave">Save plan</button>
+  </div>
+  <p class="muted" style="margin:12px 0 0">The user gets the new allowance straight away. Every change is logged with who made it.</p>
+</dialog>
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
+const URL_ = "https://fefjyufaisznmcjosvdc.supabase.co";
+const KEY = "sb_publishable_sfHdwIy9DfBqxdRDIb8rwA_8kVM3v_d";
+const sb = createClient(URL_, KEY, { auth: { flowType: "pkce", detectSessionInUrl: true, persistSession: true } });
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+const inr = (n) => "₹" + Number(n || 0).toLocaleString("en-IN", { maximumFractionDigits: n < 100 ? 2 : 0 });
+const num = (n) => Number(n || 0).toLocaleString("en-IN");
+const PLAN_MIN = { Free: 100, Pro: 600, Premium: 1500, Team: 5000, Custom: 1000 };
+const LANG = { en: "English", hi: "Hindi", bn: "Bengali", ta: "Tamil", te: "Telugu", kn: "Kannada", ml: "Malayalam", mr: "Marathi", gu: "Gujarati", pa: "Punjabi", od: "Odia", es: "Spanish", fr: "French", de: "German", ar: "Arabic", ja: "Japanese" };
+let users = [], days = 30, current = null;
+
+async function api(action, body = {}) {
+  const { data: { session } } = await sb.auth.getSession();
+  const res = await fetch(URL_ + "/functions/v1/admin", { method: "POST", headers: { Authorization: "Bearer " + session.access_token, apikey: KEY, "Content-Type": "application/json" }, body: JSON.stringify({ action, ...body }) });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) throw Object.assign(new Error(out.error || res.status), { out, status: res.status });
+  return out;
+}
+function ago(iso) {
+  if (!iso) return "Never";
+  const m = (Date.now() - Date.parse(iso)) / 60000;
+  if (m < 60) return Math.max(1, Math.round(m)) + " min ago";
+  if (m < 1440) return Math.round(m / 60) + " h ago";
+  const d = Math.round(m / 1440); return d === 1 ? "Yesterday" : d + " days ago";
+}
+const dmy = (iso) => new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+
+async function start() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { $("gate").hidden = false; return; }
+  try { const me = await api("me"); $("meEmail").textContent = "Signed in as " + me.email; }
+  catch (e) {
+    $("gate").hidden = false;
+    $("gateErr").hidden = false;
+    $("gateErr").textContent = e.status === 403 ? (e.out.email + " isn't an admin.") : "Couldn't reach the server.";
+    return;
+  }
+  $("app").hidden = false;
+  loadOverview(); loadUsers();
+}
+$("signin").onclick = () => sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: location.origin + "/admin/" } });
+$("signout").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+document.querySelectorAll("nav [data-tab]").forEach((b) => b.onclick = () => {
+  document.querySelectorAll("nav [data-tab]").forEach((x) => x.removeAttribute("aria-current"));
+  b.setAttribute("aria-current", "page");
+  $("tab-users").hidden = b.dataset.tab !== "users"; $("tab-costs").hidden = b.dataset.tab !== "costs";
+  if (b.dataset.tab === "costs") loadCosts();
+});
+$("range").onclick = (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  $("range").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  days = Number(b.dataset.d); loadOverview();
+};
+
+async function loadOverview() {
+  const o = await api("overview", { days: Math.max(days, 7) === days ? days : 7 });
+  const stat = (l, v, n) => `<div class="card stat"><div class="l">${l}</div><div class="v">${v}</div><div class="n">${n}</div></div>`;
+  $("stats").innerHTML = stat("Signed up", num(o.signed_up), "+" + o.new_this_week + " this week") + stat("Active this month", num(o.active_month), "used Zypnik at least once")
+    + stat("Minutes dictated", num(o.minutes_month), "this month") + stat("Words typed", num(o.words_month), "this month") + stat("Paying users", num(o.paying), "Pro and Premium");
+  const pd = o.per_day.slice(-Math.max(days, 7));
+  const max = Math.max(1, ...pd.map((d) => d.android + d.windows));
+  $("daysLabel").textContent = "Phone and Windows, last " + pd.length + " days (peak " + max + " min)";
+  $("dayBars").innerHTML = pd.map((d) => `<div title="${d.day}: ${d.android} phone + ${d.windows} Windows min"><div style="background:#E8833A;border-radius:3px 3px 0 0;height:${d.windows / max * 100}%"></div><div style="background:#3B4BD8;height:${d.android / max * 100}%"></div></div>`).join("");
+  const hmax = Math.max(1, ...o.hours);
+  $("heat").innerHTML = o.hours.map((v, i) => `<div title="${i}:00 · ${v}" style="background:rgba(59,75,216,${0.07 + v / hmax * 0.9})"></div>`).join("");
+  const total = o.languages.reduce((a, l) => a + l.count, 0) || 1;
+  $("langs").innerHTML = o.languages.length ? o.languages.map((l) => `<span class="chip">${esc(LANG[l.lang] || l.lang)} ${Math.round(l.count / total * 100)}%</span>`).join("") : '<span class="muted">Shows from 27 Nov onwards.</span>';
+}
+
+async function loadUsers() {
+  users = (await api("users")).users; renderUsers();
+}
+function renderUsers() {
+  const q = $("q").value.trim().toLowerCase(), pf = $("planFilter").value;
+  const rows = users.filter((u) => (!q || (u.email + " " + u.name).toLowerCase().includes(q)) && (!pf || u.plan === pf));
+  $("users").innerHTML = rows.map((u) => {
+    const pct = u.limit_seconds ? Math.min(100, u.used_seconds / u.limit_seconds * 100) : 0;
+    const dev = u.devices.map((d) => d === "windows" ? "Windows" : "Phone").join(", ") || "—";
+    return `<tr><td><div style="font-weight:600">${esc(u.name || u.email.split("@")[0])}</div><div class="muted">${esc(u.email)}</div></td>
+      <td>${dmy(u.created_at)}</td><td>${dev}</td>
+      <td><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span>${u.plan_until ? `<div class="muted">until ${dmy(u.plan_until)}</div>` : ""}</td>
+      <td><div style="font-size:13px">${num(Math.round(u.used_seconds / 60))} of ${num(Math.round(u.limit_seconds / 60))} min</div><div class="meter"><div style="width:${pct}%;background:${pct > 85 ? "#C2410C" : "#3B4BD8"}"></div></div></td>
+      <td>${num(u.words_month)}</td><td>${ago(u.last_active)}</td>
+      <td><button class="btn primary" style="padding:7px 12px;font-size:13px" data-uid="${u.id}">Change plan</button></td></tr>`;
+  }).join("") || '<tr><td colspan="8" class="muted">No one matches.</td></tr>';
+}
+$("q").oninput = renderUsers; $("planFilter").onchange = renderUsers;
+$("users").onclick = (e) => { const b = e.target.closest("[data-uid]"); if (b) openPlan(users.find((u) => u.id === b.dataset.uid)); };
+$("csv").onclick = () => {
+  const head = ["email", "name", "signed_up", "devices", "plan", "minutes_used", "minutes_allowed", "words_month", "last_active"];
+  const lines = [head.join(",")].concat(users.map((u) => [u.email, u.name, u.created_at.slice(0, 10), u.devices.join(" "), u.plan, Math.round(u.used_seconds / 60), Math.round(u.limit_seconds / 60), u.words_month, u.last_active || ""].map((v) => '"' + String(v).replace(/"/g, '""') + '"').join(",")));
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" })); a.download = "zypnik-users.csv"; a.click();
+};
+
+let picked = "Pro";
+function openPlan(u) {
+  current = u; picked = ["Free", "Pro", "Premium", "Team", "Custom"].includes(u.plan) ? u.plan : "Pro";
+  $("planWho").textContent = (u.name || u.email) + " · " + u.email + " · signed up " + dmy(u.created_at);
+  $("planMin").value = Math.round(u.limit_seconds / 60); $("planNote").value = u.plan_note || ""; $("planUntil").value = ""; $("planErr").hidden = true;
+  drawPlans(); $("planDlg").showModal();
+}
+function drawPlans() {
+  $("planBtns").innerHTML = Object.keys(PLAN_MIN).map((p) => `<button type="button" data-p="${p}" aria-pressed="${p === picked}"><b>${p}</b><span>${num(PLAN_MIN[p])} min / month</span></button>`).join("");
+}
+$("planBtns").onclick = (e) => { const b = e.target.closest("[data-p]"); if (!b) return; picked = b.dataset.p; $("planMin").value = PLAN_MIN[picked]; drawPlans(); };
+$("planCancel").onclick = () => $("planDlg").close();
+$("planSave").onclick = async () => {
+  const months = Number($("planUntil").value);
+  let until = null;
+  if (months) { const d = new Date(); d.setMonth(d.getMonth() + months); until = d.toISOString().slice(0, 10); }
+  try {
+    $("planSave").disabled = true;
+    await api("set_plan", { user_id: current.id, plan: picked, monthly_minutes: Number($("planMin").value || 0), until, note: $("planNote").value });
+    $("planDlg").close(); loadUsers();
+  } catch (e) { $("planErr").hidden = false; $("planErr").textContent = "Couldn't save: " + (e.out?.error || e.message); }
+  finally { $("planSave").disabled = false; }
+};
+
+const SVC = { sarvam: ["Sarvam", "Indian speech, live"], deepgram: ["Deepgram", "Global speech, busy rooms"], openai: ["OpenAI", "Hindi uploads, backup"], groq: ["Groq", "Clean-up + Whisper"], deepinfra: ["DeepInfra", "Clean-up backup"], supabase: ["Supabase", "Servers and database"] };
+$("month").value = new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 7);
+$("month").onchange = loadCosts;
+async function loadCosts() {
+  const c = await api("costs", { month: $("month").value });
+  const stat = (l, v, n, cls = "") => `<div class="card stat"><div class="l">${l}</div><div class="v ${cls}">${v}</div><div class="n">${n}</div></div>`;
+  $("cstats").innerHTML = stat("Spent", inr(c.spent), "bills where entered, else estimate") + stat("Earned", inr(c.earned), "after GST and store fees")
+    + stat("Profit", inr(c.profit), "earned minus spent", c.profit >= 0 ? "pos" : "neg") + stat("Cost per active user", inr(c.cost_per_user), "estimate") + stat("Cost per minute", inr(c.cost_per_minute), "speech + clean-up");
+  const max = Math.max(1, ...c.per_day.map((d) => Math.max(d.cost, d.revenue)));
+  $("cBars").innerHTML = c.per_day.map((d) => `<div style="flex-direction:row;align-items:flex-end;gap:2px" title="${d.day}: spend ${inr(d.cost)}, revenue ${inr(d.revenue)}"><div style="flex:1;background:#E8833A;border-radius:3px 3px 0 0;height:${d.cost / max * 100}%"></div><div style="flex:1;background:#2F7D4F;border-radius:3px 3px 0 0;height:${Math.max(d.revenue / max * 100, 0.5)}%"></div></div>`).join("") || '<span class="muted">No usage this month.</span>';
+  const smax = Math.max(1, ...c.services.map((s) => s.bill ?? s.estimate));
+  $("svcs").innerHTML = c.services.map((s) => { const v = s.bill ?? s.estimate; return `<div class="svc"><div><div style="font-weight:600">${SVC[s.service][0]}</div><div class="muted">${SVC[s.service][1]}</div></div><div class="bar"><div style="width:${v / smax * 100}%"></div></div><div style="text-align:right;font-weight:600">${inr(v)}${s.free_tier ? '<div class="muted">free tier</div>' : ""}</div></div>`; }).join("");
+  $("bills").innerHTML = c.services.map((s) => {
+    const diff = s.bill == null ? "—" : (s.bill - s.estimate >= 0 ? "+" : "−") + inr(Math.abs(s.bill - s.estimate));
+    return `<tr><td style="font-weight:600">${SVC[s.service][0]}</td><td>${s.service === "supabase" ? "—" : inr(s.estimate)}</td>
+      <td><input type="number" min="0" step="0.01" style="width:130px" value="${s.bill ?? ""}" data-bill="${s.service}" aria-label="${SVC[s.service][0]} bill"></td><td>${diff}</td>
+      <td><button class="btn" data-save="${s.service}">Save</button></td></tr>`;
+  }).join("");
+  $("cusers").innerHTML = c.users.map((u) => {
+    const pays = u.plan === "Team" ? "Company" : inr(u.revenue);
+    const m = u.plan === "Team" ? '<span class="muted">n/a</span>' : `<span class="${u.revenue - u.cost >= 0 ? "pos" : "neg"}">${u.revenue - u.cost >= 0 ? "+" : "−"}${inr(Math.abs(u.revenue - u.cost))}</span>`;
+    return `<tr><td><div style="font-weight:600">${esc(u.name || u.email.split("@")[0])}</div><div class="muted">${esc(u.email)}</div></td><td><span class="plan ${esc(u.plan)}">${esc(u.plan)}</span></td><td>${num(u.minutes)}</td><td>${inr(u.cost)}</td><td>${pays}</td><td>${m}</td></tr>`;
+  }).join("") || '<tr><td colspan="6" class="muted">No usage this month.</td></tr>';
+}
+$("bills").onclick = async (e) => {
+  const b = e.target.closest("[data-save]"); if (!b) return;
+  const v = document.querySelector(`[data-bill="${b.dataset.save}"]`).value;
+  if (v === "") return;
+  b.disabled = true; b.textContent = "Saving…";
+  try { await api("set_bill", { month: $("month").value, service: b.dataset.save, amount_inr: Number(v) }); loadCosts(); }
+  catch { b.textContent = "Failed"; b.disabled = false; }
+};
+sb.auth.onAuthStateChange((ev) => { if (ev === "SIGNED_IN" && $("app").hidden) { $("gate").hidden = true; start(); } });
+start();
+</script>
+</body>
+</html>
